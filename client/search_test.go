@@ -130,7 +130,7 @@ func TestSearchInvoices_NoInvoices(t *testing.T) {
 		t.Fatalf("Expected an error, got nil")
 	}
 
-	expectedError := "no invoice rows found in table"
+	expectedError := "Không có tìm thấy hóa đơn nào"
 	if err.Error() != expectedError {
 		t.Errorf("Expected error message %q, got %q", expectedError, err.Error())
 	}

@@ -77,7 +77,7 @@ func parseInvoiceTable(r io.Reader) ([]Invoice, error) {
 	f(doc)
 
 	if len(invoices) == 0 {
-		return nil, fmt.Errorf("no invoice rows found in table")
+		return nil, fmt.Errorf("Không có tìm thấy hóa đơn nào")
 	}
 	return invoices, nil
 }
