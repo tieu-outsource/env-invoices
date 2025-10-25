@@ -21,6 +21,11 @@ jobs:
           libxcursor-dev libxi-dev libxxf86vm-dev \
           mesa-common-dev libgl1-mesa-dev
 
+    - name: Install MinGW for Windows build
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -29,8 +34,15 @@ jobs:
     - name: Build (Linux)
       run: go build -v -o build/linux/env-invoices ./main.go
 
-    - name: Build (Windows)
-      run: GOOS=windows GOARCH=amd64 go build -v -o build/windows/env-invoices.exe ./main.go
+    - name: Build Windows binary
+      run: |
+        export GOOS=windows
+        export GOARCH=amd64
+        export CC=x86_64-w64-mingw32-gcc
+        export CXX=x86_64-w64-mingw32-g++
+        export CGO_ENABLED=1
+        go mod tidy
+        go build -v -o build/windows/env-invoices.exe ./main.go
 
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
