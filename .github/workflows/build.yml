@@ -15,10 +15,10 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.25'
+        go-version: '1.22'
 
     - name: Build (Linux)
-      run: go build -v -o build/linux/env-invoices ./...
+      run: go build -v -o build/linux/env-invoices ./cmd/cli
 
     - name: Build (Windows)
-      run: GOOS=windows GOARCH=amd64 go build -v -o build/windows/env-invoices.exe ./...
+      run: GOOS=windows GOARCH=amd64 go build -v -o build/windows/env-invoices.exe ./cmd/cli
