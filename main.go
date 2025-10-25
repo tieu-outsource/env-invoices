@@ -16,7 +16,6 @@ import (
 	"sync"
 	"time"
 
-	"env-invoices/activation"
 	"env-invoices/client"
 	"env-invoices/utils"
 
@@ -197,13 +196,6 @@ func main() {
 
 	var startButton *widget.Button
 	startButton = widget.NewButton("Start Download", func() {
-		// Check activation before allowing download
-		if !activation.IsActivated() {
-			dialog.ShowInformation("Activation Required",
-				"This application is not activated. Please activate it first.", mainW)
-			return
-		}
-
 		apiKey := apiKeyEntry.Text
 		if apiKey == "" {
 			dialog.ShowError(fmt.Errorf("please enter your captcha solver API key"), mainW)
@@ -276,17 +268,7 @@ func main() {
 
 	totalProgressLabel = widget.NewLabel("Total Progress: 0/0")
 
-	// Add activation button
-	var activationButton *widget.Button // declare first
-	activationButton = widget.NewButton("Activation", func() {
-		showActivationDialog(activationButton)
-	})
-
-	if activation.IsActivated() {
-		activationButton.Hide()
-	}
-
-	topContent := container.NewVBox(apiKeyEntry, filterForm, selectFolderButton, downloadDirLabel, selectFileButton, activationButton)
+	topContent := container.NewVBox(apiKeyEntry, filterForm, selectFolderButton, downloadDirLabel, selectFileButton)
 	bottomContent := container.NewVBox(totalProgressLabel, startButton)
 
 	content := container.NewBorder(topContent, bottomContent, nil, nil, table)
@@ -601,78 +583,4 @@ func extractZipBytes(data []byte, dest string) error {
 	}
 
 	return nil
-}
-
-// showActivationDialog displays the activation dialog to the user
-func showActivationDialog(activationButton *widget.Button) {
-	deviceID, err := activation.GetDeviceID()
-	if err != nil {
-		dialog.ShowError(fmt.Errorf("failed to get device ID: %w", err), mainW)
-		return
-	}
-
-	deviceIDLabel := widget.NewLabel("Your Device ID:")
-	deviceIDEntry := widget.NewEntry()
-	deviceIDEntry.SetText(deviceID)
-	deviceIDEntry.Disable()
-
-	copyButton := widget.NewButton("Copy Device ID", func() {
-		mainW.Clipboard().SetContent(deviceID)
-		dialog.ShowInformation("Copied", "Device ID copied to clipboard!", mainW)
-	})
-
-	instructionLabel := widget.NewLabel(
-		"To activate this application:\n" +
-			"1. Copy your Device ID using the button above\n" +
-			"2. Send it to the administrator\n" +
-			"3. Paste the activation key you receive below")
-	instructionLabel.Wrapping = fyne.TextWrapWord
-
-	activationKeyEntry := widget.NewMultiLineEntry()
-	activationKeyEntry.SetPlaceHolder("Paste your activation key here...")
-	activationKeyEntry.SetMinRowsVisible(3)
-
-	var activationDialog dialog.Dialog
-
-	activateButton := widget.NewButton("Activate", func() {
-		activationKey := strings.TrimSpace(activationKeyEntry.Text)
-		if activationKey == "" {
-			dialog.ShowError(fmt.Errorf("please enter an activation key"), mainW)
-			return
-		}
-
-		err := activation.SaveActivationKey(activationKey)
-		if err != nil {
-			dialog.ShowError(fmt.Errorf("activation failed: %w", err), mainW)
-			return
-		}
-
-		// Hide activation button after success
-		activationButton.Hide()
-
-		dialog.ShowInformation("Success", "Application activated successfully!", mainW)
-		activationDialog.Hide()
-	})
-
-	closeButton := widget.NewButton("Close", func() {
-		activationDialog.Hide()
-	})
-
-	content := container.NewVBox(
-		widget.NewLabel("Application Activation Required"),
-		widget.NewSeparator(),
-		deviceIDLabel,
-		deviceIDEntry,
-		copyButton,
-		widget.NewSeparator(),
-		instructionLabel,
-		widget.NewLabel("Activation Key:"),
-		activationKeyEntry,
-		widget.NewSeparator(),
-		container.NewHBox(activateButton, closeButton),
-	)
-
-	activationDialog = dialog.NewCustom("Activation", "Close", content, mainW)
-	activationDialog.Resize(fyne.NewSize(500, 450))
-	activationDialog.Show()
 }
