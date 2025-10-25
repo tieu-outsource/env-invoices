@@ -57,7 +57,7 @@ var (
 )
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("com.letieu.env-invoices")
 	mainW = a.NewWindow("Bulk Invoice Downloader")
 
 	apiKeyEntry = widget.NewPasswordEntry()
