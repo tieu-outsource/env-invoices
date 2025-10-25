@@ -204,7 +204,7 @@ func main() {
 	startButton = widget.NewButton("Start Download", func() {
 		// Check activation before allowing download
 		if !activation.IsActivated() {
-			dialog.ShowInformation("Activation Required", 
+			dialog.ShowInformation("Activation Required",
 				"This application is not activated. Please activate it first.", mainW)
 			showActivationDialog()
 			return
@@ -281,12 +281,15 @@ func main() {
 	})
 
 	totalProgressLabel = widget.NewLabel("Total Progress: 0/0")
-	
+
 	// Add activation button
 	activationButton := widget.NewButton("Activation", func() {
 		showActivationDialog()
 	})
-	
+	if activation.IsActivated() {
+		activationButton.Hide()
+	}
+
 	topContent := container.NewVBox(apiKeyEntry, filterForm, selectFolderButton, downloadDirLabel, selectFileButton, activationButton)
 	bottomContent := container.NewVBox(totalProgressLabel, startButton)
 
@@ -625,9 +628,9 @@ func showActivationDialog() {
 
 	instructionLabel := widget.NewLabel(
 		"To activate this application:\n" +
-		"1. Copy your Device ID using the button above\n" +
-		"2. Send it to the administrator\n" +
-		"3. Paste the activation key you receive below")
+			"1. Copy your Device ID using the button above\n" +
+			"2. Send it to the administrator\n" +
+			"3. Paste the activation key you receive below")
 	instructionLabel.Wrapping = fyne.TextWrapWord
 
 	activationKeyEntry := widget.NewMultiLineEntry()
