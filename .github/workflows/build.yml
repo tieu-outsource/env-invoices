@@ -23,8 +23,7 @@ jobs:
     - name: Build (Windows)
       run: GOOS=windows GOARCH=amd64 go build -v -o build/windows/env-invoices.exe ./cmd/cli
 
-    - name: Upload Linux Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: env-invoices-linux
         path: build/linux/env-invoices
