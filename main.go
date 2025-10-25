@@ -60,11 +60,6 @@ func main() {
 	a := app.New()
 	mainW = a.NewWindow("Bulk Invoice Downloader")
 
-	// Check activation status on startup
-	if !activation.IsActivated() {
-		showActivationDialog()
-	}
-
 	apiKeyEntry = widget.NewPasswordEntry()
 	apiKeyEntry.SetPlaceHolder("Enter Captcha Solver API Key")
 
@@ -206,7 +201,6 @@ func main() {
 		if !activation.IsActivated() {
 			dialog.ShowInformation("Activation Required",
 				"This application is not activated. Please activate it first.", mainW)
-			showActivationDialog()
 			return
 		}
 
@@ -283,9 +277,11 @@ func main() {
 	totalProgressLabel = widget.NewLabel("Total Progress: 0/0")
 
 	// Add activation button
-	activationButton := widget.NewButton("Activation", func() {
-		showActivationDialog()
+	var activationButton *widget.Button // declare first
+	activationButton = widget.NewButton("Activation", func() {
+		showActivationDialog(activationButton)
 	})
+
 	if activation.IsActivated() {
 		activationButton.Hide()
 	}
@@ -608,14 +604,13 @@ func extractZipBytes(data []byte, dest string) error {
 }
 
 // showActivationDialog displays the activation dialog to the user
-func showActivationDialog() {
+func showActivationDialog(activationButton *widget.Button) {
 	deviceID, err := activation.GetDeviceID()
 	if err != nil {
 		dialog.ShowError(fmt.Errorf("failed to get device ID: %w", err), mainW)
 		return
 	}
 
-	// Create UI elements
 	deviceIDLabel := widget.NewLabel("Your Device ID:")
 	deviceIDEntry := widget.NewEntry()
 	deviceIDEntry.SetText(deviceID)
@@ -651,6 +646,9 @@ func showActivationDialog() {
 			dialog.ShowError(fmt.Errorf("activation failed: %w", err), mainW)
 			return
 		}
+
+		// Hide activation button after success
+		activationButton.Hide()
 
 		dialog.ShowInformation("Success", "Application activated successfully!", mainW)
 		activationDialog.Hide()
