@@ -16,7 +16,7 @@ const (
 	// This is the secret key for signing JWTs - you should keep this secret
 	// For production, you might want to use environment variables or a config file
 	jwtSecret = "your-secret-key-change-this-in-production-2024"
-	
+
 	activationFile = "activation.key"
 )
 
@@ -65,11 +65,11 @@ func GetDeviceID() (string, error) {
 
 // GenerateActivationKey creates a JWT token for a specific device ID
 // This function should only be used by the admin
-func GenerateActivationKey(deviceID string) (string, error) {
+func GenerateActivationKey(deviceID string, days int) (string, error) {
 	claims := Claims{
 		DeviceID: deviceID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(365 * 24 * time.Hour)), // 1 year expiration
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(days) * 24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "env-invoices-admin",
 		},
@@ -137,7 +137,7 @@ func LoadActivationKey() (string, error) {
 	}
 
 	activationKey := strings.TrimSpace(string(data))
-	
+
 	// Validate the loaded key
 	if err := ValidateActivationKey(activationKey); err != nil {
 		return "", err
