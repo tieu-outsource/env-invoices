@@ -80,10 +80,14 @@ func main() {
 	}
 
 	invoice := invoices[0]
-	base64ZipFile, err := c.DownloadInvoice(invoice)
+	zipFile, err := c.DownloadInvoice(invoice)
 	if err != nil {
 		log.Fatalf("Failed to download invoice: %v", err)
 	}
 
-	fmt.Printf("Downloaded invoice: %s\n", base64ZipFile)
+	// save zip file to invoice.zip
+	err = os.WriteFile("invoice.zip", zipFile, 0644)
+	if err != nil {
+		log.Fatalf("Failed to save zip file: %v", err)
+	}
 }
