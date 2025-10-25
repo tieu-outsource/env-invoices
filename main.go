@@ -55,9 +55,20 @@ var (
 	apiKeyEntry             *widget.Entry
 )
 
+// this is demo version
+// expire in 2025-10-27
+var expireDate = time.Date(2025, 10, 27, 0, 0, 0, 0, time.UTC)
+
 func main() {
 	a := app.NewWithID("com.letieu.env-invoices")
 	mainW = a.NewWindow("Bulk Invoice Downloader")
+
+	if expireDate.Before(time.Now()) {
+		mainW.Resize(fyne.NewSize(800, 600))
+		dialog.ShowError(fmt.Errorf("this version is expired"), mainW)
+		mainW.ShowAndRun()
+		return
+	}
 
 	apiKeyEntry = widget.NewPasswordEntry()
 	apiKeyEntry.SetPlaceHolder("Enter Captcha Solver API Key")
