@@ -18,10 +18,10 @@ jobs:
         go-version: '1.22'
 
     - name: Build (Linux)
-      run: go build -v -o build/linux/env-invoices ./cmd/cli
+      run: go build -v -o build/linux/env-invoices ./main.go
 
     - name: Build (Windows)
-      run: GOOS=windows GOARCH=amd64 go build -v -o build/windows/env-invoices.exe ./cmd/cli
+      run: GOOS=windows GOARCH=amd64 go build -v -o build/windows/env-invoices.exe ./main.go
 
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4
