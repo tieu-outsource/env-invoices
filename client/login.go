@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,13 +11,14 @@ import (
 	"golang.org/x/net/html"
 )
 
-// LoginDetails holds the information extracted from the login page
-// that is required to perform a login.
 type LoginDetails struct {
 	Token         string
 	CaptchaDeText string
 	CaptchaImgURL string
 }
+
+var ErrWrongCaptcha = errors.New("wrong captcha")
+var ErrWrongCredentials = errors.New("wrong credentials")
 
 // GetLoginDetails fetches the login page and extracts the necessary details for logging in.
 func (c *Client) GetLoginDetails() (*LoginDetails, error) {
@@ -68,7 +70,6 @@ func (c *Client) DownloadLoginCaptcha(fileUrl string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-
 // Login performs the login action.
 func (c *Client) Login(details *LoginDetails, username, password, captcha string) error {
 	// POST to login
@@ -106,7 +107,15 @@ func (c *Client) Login(details *LoginDetails, username, password, captcha string
 	}
 
 	if strings.Contains(string(bodyBytes), "login-form") {
-		return fmt.Errorf("login failed, response contains login form")
+		if strings.Contains(html.UnescapeString(string(bodyBytes)), "Mã xác thực không chính xác") {
+			return ErrWrongCaptcha
+		}
+
+		if strings.Contains(html.UnescapeString(string(bodyBytes)), "Tài khoản/mật khẩu không chính xác") {
+			return ErrWrongCredentials
+		}
+
+		return fmt.Errorf("login failed, response contains login form: %s", string(bodyBytes))
 	}
 
 	return nil

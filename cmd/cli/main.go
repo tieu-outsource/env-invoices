@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -9,9 +10,27 @@ import (
 	"strings"
 
 	"env-invoices/client"
+	"env-invoices/utils"
 )
 
 func main() {
+	args := os.Args[1:]
+
+	switch args[0] {
+	case "download":
+		download()
+	case "cc":
+		convertCaptcha()
+	default:
+		fmt.Println("Usage: cli download")
+	}
+}
+
+func download() {
+	if len(os.Args) != 4 {
+		log.Fatal("Usage: cli login <username> <password>")
+	}
+
 	c, err := client.New()
 	if err != nil {
 		log.Fatal(err)
@@ -58,9 +77,8 @@ func main() {
 	captcha, _ := reader.ReadString('\n')
 	captcha = strings.TrimSpace(captcha)
 
-	// Hardcode credentials for now
-	username := "PA04GT7017040"
-	password := "123456"
+	username := os.Args[2]
+	password := os.Args[3]
 
 	// Login
 	err = c.Login(details, username, password, captcha)
@@ -90,4 +108,25 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to save zip file: %v", err)
 	}
+}
+
+func convertCaptcha() {
+	if len(os.Args) != 3 {
+		log.Fatal("Usage: cli cc <imgpath> <key>")
+	}
+
+	log.Printf("Reading image from %s", os.Args[2])
+	img, err := os.ReadFile(os.Args[2])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	imgBase64 := base64.StdEncoding.EncodeToString(img)
+
+	key := os.Args[3]
+	out, err := utils.ResolveCaptcha(imgBase64, key)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(out)
 }
