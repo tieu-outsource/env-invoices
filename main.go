@@ -57,7 +57,7 @@ var (
 
 // this is demo version
 // expire in 2025-10-27
-var expireDate = time.Date(2025, 10, 27, 0, 0, 0, 0, time.UTC)
+var expireDate = time.Date(2029, 10, 27, 0, 0, 0, 0, time.UTC)
 
 func main() {
 	a := app.NewWithID("com.letieu.env-invoices")
